@@ -3,8 +3,6 @@ package gerrit
 import (
 	"context"
 	"testing"
-
-	"github.com/nexuer/utils/ptr"
 )
 
 func TestProjectsService_ListProjects(t *testing.T) {
@@ -13,16 +11,15 @@ func TestProjectsService_ListProjects(t *testing.T) {
 	})
 
 	projects, err := client.Projects.ListProjects(context.Background(), &ListProjectsOptions{
-		Skip:        ptr.Ptr(0),
-		Limit:       ptr.Ptr(0),
-		Description: ptr.Ptr(true),
+		//Description: ptr.Ptr(true),
+		ListOptions: NewListOptions(1, 50),
 	})
 
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	t.Logf("projects: %v", projects)
+	t.Logf("projects: %v", len(projects))
 }
 
 func TestProjectsService_GetProject(t *testing.T) {
@@ -38,4 +35,15 @@ func TestProjectsService_GetProject(t *testing.T) {
 
 	t.Logf("projects: %v", project)
 
+}
+
+func TestProjectsService_CreateProject(t *testing.T) {
+	client := NewClient(testPasswordCredential, &Options{Debug: true})
+
+	project, err := client.Projects.CreateProject(context.Background(), "test-1", &CreateProjectOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("projects: %v", project)
 }

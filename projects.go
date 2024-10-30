@@ -41,11 +41,7 @@ type ProjectInfo struct {
 }
 
 type ListProjectsOptions struct {
-	// Limit the number of projects to be included in the results.
-	Limit *int `query:"n,omitempty"`
-
-	// Skip the given number of branches from the beginning of the list.
-	Skip *int `query:"S,omitempty"`
+	ListOptions `query:",inline,omitempty"`
 
 	// Limit the results to the projects having the specified branch and include the sha1 of the branch in the results.
 	Branch *string `query:"b,omitempty"`
@@ -70,13 +66,16 @@ type ListProjectsOptions struct {
 
 	// Get projects with specified type: ALL, CODE, PERMISSIONS.
 	Type *ProjectType `query:"type,omitempty"`
+
+	All   *bool         `query:"all,omitempty"`
+	State *ProjectState `query:"state,omitempty"`
 }
 
 // ListProjects gets a list of projects accessible by the authenticated user.
 // Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-projects.html#list-projects
 func (ps *ProjectsService) ListProjects(ctx context.Context, opts *ListProjectsOptions) (map[string]*ProjectInfo, error) {
 	var projects map[string]*ProjectInfo
-	if err := ps.client.InvokeByCredential(ctx, http.MethodGet, "projects/", opts, &projects); err != nil {
+	if _, err := ps.client.InvokeByCredential(ctx, http.MethodGet, "projects/", opts, &projects); err != nil {
 		return nil, err
 	}
 	return projects, nil
@@ -89,7 +88,42 @@ func (ps *ProjectsService) GetProject(ctx context.Context, projectName string) (
 	u := fmt.Sprintf("projects/%s", url.QueryEscape(projectName))
 
 	var project ProjectInfo
-	if err := ps.client.InvokeByCredential(ctx, http.MethodGet, u, nil, &project); err != nil {
+	if _, err := ps.client.InvokeByCredential(ctx, http.MethodGet, u, nil, &project); err != nil {
+		return nil, err
+	}
+
+	return &project, nil
+}
+
+// CreateProjectOptions entity contains information for the creation of a new project.
+type CreateProjectOptions struct {
+	Name                             *string                      `json:"name,omitempty"`
+	Parent                           *string                      `json:"parent,omitempty"`
+	Description                      *string                      `json:"description,omitempty"`
+	PermissionsOnly                  *bool                        `json:"permissions_only,omitempty"`
+	CreateEmptyCommit                *bool                        `json:"create_empty_commit,omitempty"`
+	SubmitType                       *string                      `json:"submit_type,omitempty"`
+	Branches                         []string                     `json:"branches,omitempty"`
+	Owners                           []string                     `json:"owners,omitempty"`
+	UseContributorAgreements         *string                      `json:"use_contributor_agreements,omitempty"`
+	UseSignedOffBy                   *string                      `json:"use_signed_off_by,omitempty"`
+	CreateNewChangeForAllNotInTarget *string                      `json:"create_new_change_for_all_not_in_target,omitempty"`
+	UseContentMerge                  *string                      `json:"use_content_merge,omitempty"`
+	RequireChangeID                  *string                      `json:"require_change_id,omitempty"`
+	EnableSignedPush                 *string                      `json:"enable_signed_push,omitempty"`
+	MaxObjectSizeLimit               *string                      `json:"max_object_size_limit,omitempty"`
+	PluginConfigValues               map[string]map[string]string `json:"plugin_config_values,omitempty"`
+	RejectEmptyCommit                *string                      `json:"reject_empty_commit,omitempty"`
+}
+
+// CreateProject creates a new project.
+//
+// Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-projects.html#create-project
+func (ps *ProjectsService) CreateProject(ctx context.Context, projectName string, opts *CreateProjectOptions) (*ProjectInfo, error) {
+	u := fmt.Sprintf("projects/%s/", url.QueryEscape(projectName))
+
+	var project ProjectInfo
+	if _, err := ps.client.InvokeByCredential(ctx, http.MethodPut, u, opts, &project); err != nil {
 		return nil, err
 	}
 

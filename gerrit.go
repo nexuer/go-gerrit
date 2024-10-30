@@ -38,6 +38,11 @@ func NewClient(credential Credential, opts ...*Options) *Client {
 	c := &Client{}
 
 	clientOpts := c.parseOptions(opts...)
+	clientOpts = append(clientOpts,
+		ghttp.WithNot2xxError(func() error {
+			return new(Error)
+		}),
+	)
 	c.cc = ghttp.NewClient(clientOpts...)
 
 	c.common.client = c
@@ -95,7 +100,10 @@ func (c *Client) SetCredential(credential Credential) {
 
 var magicPrefix = []byte(")]}'\n")
 
-func (c *Client) InvokeByCredential(ctx context.Context, method, path string, args any, reply any) error {
+func (c *Client) InvokeByCredential(ctx context.Context, method, path string, args any, reply any) (*http.Response, error) {
+	if c.credential != nil {
+		path = c.credential.AuthURL(path)
+	}
 	callOpts := &ghttp.CallOptions{
 		BeforeHook: func(request *http.Request) error {
 			if c.credential != nil {
@@ -107,7 +115,7 @@ func (c *Client) InvokeByCredential(ctx context.Context, method, path string, ar
 	return c.Invoke(ctx, method, path, args, reply, callOpts)
 }
 
-func (c *Client) Invoke(ctx context.Context, method, path string, args any, reply any, callOpts ...*ghttp.CallOptions) error {
+func (c *Client) Invoke(ctx context.Context, method, path string, args any, reply any, callOpts ...*ghttp.CallOptions) (*http.Response, error) {
 	callOpt := &ghttp.CallOptions{}
 	if len(callOpts) > 0 && callOpts[0] != nil {
 		callOpt = callOpts[0]
@@ -131,6 +139,45 @@ func (c *Client) Invoke(ctx context.Context, method, path string, args any, repl
 		return nil
 	}
 
-	_, err := c.cc.Invoke(ctx, method, path, args, reply, callOpt)
-	return err
+	return c.cc.Invoke(ctx, method, path, args, reply, callOpt)
+}
+
+type Error struct {
+	Message string
+}
+
+func (e *Error) UnmarshalJSON(data []byte) error {
+	if len(data) == 0 {
+		return nil
+	}
+	e.Message = string(data)
+	return nil
+}
+
+func (e *Error) Error() string {
+	return e.Message
+}
+
+type ListOptions struct {
+	// Limit the number of projects to be included in the results.
+	Limit int `query:"n,omitempty"`
+
+	// Skip the given number of branches from the beginning of the list.
+	Skip int `query:"S,omitempty"`
+}
+
+const defaultLimit = 25
+
+func NewListOptions(s int, l ...int) ListOptions {
+	if s <= 0 {
+		s = 1
+	}
+	ll := defaultLimit
+	if len(l) > 0 && l[0] > 0 {
+		ll = l[0]
+	}
+	return ListOptions{
+		Skip:  s,
+		Limit: ll,
+	}
 }

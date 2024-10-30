@@ -40,7 +40,7 @@ type ListBranchesOptions struct {
 func (ps *ProjectsService) ListBranches(ctx context.Context, projectName string, opts *ListBranchesOptions) ([]*BranchInfo, error) {
 	u := fmt.Sprintf("projects/%s/branches/", url.QueryEscape(projectName))
 	var branches []*BranchInfo
-	if err := ps.client.InvokeByCredential(ctx, http.MethodGet, u, opts, &branches); err != nil {
+	if _, err := ps.client.InvokeByCredential(ctx, http.MethodGet, u, opts, &branches); err != nil {
 		return nil, err
 	}
 	return branches, nil
