@@ -18,11 +18,7 @@ type BranchInfo struct {
 //
 // Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-projects.html#branch-options
 type ListBranchesOptions struct {
-	// Limit the number of branches to be included in the results.
-	Limit *int `query:"n,omitempty"`
-
-	// Skip the given number of branches from the beginning of the list.
-	Skip *int `query:"S,omitempty"`
+	ListOptions `query:",inline,omitempty"`
 
 	// Substring limits the results to those projects that match the specified substring.
 	Substring *string `query:"m,omitempty"`
