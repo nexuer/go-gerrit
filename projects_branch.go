@@ -44,3 +44,16 @@ func (s *ProjectsService) ListBranches(ctx context.Context, projectName string, 
 	}
 	return branches, nil
 }
+
+// GetBranch retrieves a branch of a project.
+//
+// Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-projects.html#get-branch
+func (s *ProjectsService) GetBranch(ctx context.Context, projectName, branchID string) (*BranchInfo, error) {
+	u := fmt.Sprintf("projects/%s/branches/%s", projectName, branchID)
+
+	var reply BranchInfo
+	if _, err := s.client.InvokeByCredential(ctx, http.MethodGet, u, nil, &reply); err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}

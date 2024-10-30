@@ -57,6 +57,20 @@ func (s *AccountsService) QueryAccounts(ctx context.Context, query string, opts 
 	return reply, nil
 }
 
+// GetAccount returns an account as an AccountInfo entity.
+// If account is "self" the current authenticated account will be returned.
+//
+// Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-accounts.html#get-account
+func (s *AccountsService) GetAccount(ctx context.Context, account string) (*AccountInfo, error) {
+	u := fmt.Sprintf("accounts/%s", account)
+
+	var reply AccountInfo
+	if _, err := s.client.InvokeByCredential(ctx, http.MethodGet, u, nil, &reply); err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}
+
 type ListAccountsOptions struct {
 	ListOptions
 

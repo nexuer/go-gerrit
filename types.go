@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+const HeadRef = "HEAD"
+
 // RevisionKind describes the change kind.
 //
 // Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-changes.html#revision-info

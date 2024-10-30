@@ -25,6 +25,20 @@ func TestAccountsService_QueryAccounts(t *testing.T) {
 	t.Logf("accounts: %v", len(reply))
 }
 
+func TestAccountsService_GetAccount(t *testing.T) {
+	client := NewClient(testPasswordCredential, &Options{
+		Debug: true,
+	})
+
+	reply, err := client.Accounts.GetAccount(context.Background(), "test")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("account: %+v", reply)
+}
+
 func TestAccountsService_SetActive(t *testing.T) {
 	client := NewClient(testPasswordCredential, &Options{
 		Debug: true,
