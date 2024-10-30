@@ -3,6 +3,8 @@ package gerrit
 import (
 	"context"
 	"testing"
+
+	"github.com/nexuer/utils/ptr"
 )
 
 func TestProjectsService_ListProjects(t *testing.T) {
@@ -11,7 +13,7 @@ func TestProjectsService_ListProjects(t *testing.T) {
 	})
 
 	projects, err := client.Projects.ListProjects(context.Background(), &ListProjectsOptions{
-		//Description: ptr.Ptr(true),
+		Description: ptr.Ptr(true),
 		ListOptions: NewListOptions(1, 50),
 	})
 
@@ -20,6 +22,9 @@ func TestProjectsService_ListProjects(t *testing.T) {
 	}
 
 	t.Logf("projects: %v", len(projects))
+	if len(projects) > 0 {
+		t.Logf("first project: \n%+v", projects["11"])
+	}
 }
 
 func TestProjectsService_GetProject(t *testing.T) {
@@ -35,6 +40,34 @@ func TestProjectsService_GetProject(t *testing.T) {
 
 	t.Logf("projects: %v", project)
 
+}
+
+func TestProjectsService_GetHEAD(t *testing.T) {
+	client := NewClient(testPasswordCredential, &Options{
+		Debug: true,
+	})
+
+	head, err := client.Projects.GetHEAD(context.Background(), "All-Users")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("head: %v", head)
+}
+
+func TestProjectsService_GetRepositoryStatistics(t *testing.T) {
+	client := NewClient(testPasswordCredential, &Options{
+		Debug: true,
+	})
+
+	reply, err := client.Projects.GetRepositoryStatistics(context.Background(), "All-Users")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("reply: %v", reply)
 }
 
 func TestProjectsService_CreateProject(t *testing.T) {

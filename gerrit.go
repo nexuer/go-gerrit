@@ -33,6 +33,7 @@ type Client struct {
 	common   service
 	Projects *ProjectsService
 	Accounts *AccountsService
+	Changes  *ChangesService
 }
 
 func NewClient(credential Credential, opts ...*Options) *Client {
@@ -49,6 +50,7 @@ func NewClient(credential Credential, opts ...*Options) *Client {
 	c.common.client = c
 	c.Projects = (*ProjectsService)(&c.common)
 	c.Accounts = (*AccountsService)(&c.common)
+	c.Changes = (*ChangesService)(&c.common)
 
 	c.SetCredential(credential)
 	return c
@@ -145,19 +147,19 @@ func (c *Client) Invoke(ctx context.Context, method, path string, args any, repl
 }
 
 type Error struct {
-	Message string
+	msg string
 }
 
 func (e *Error) UnmarshalJSON(data []byte) error {
 	if len(data) == 0 {
 		return nil
 	}
-	e.Message = string(data)
+	e.msg = string(data)
 	return nil
 }
 
 func (e *Error) Error() string {
-	return e.Message
+	return e.msg
 }
 
 type ListOptions struct {

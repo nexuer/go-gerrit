@@ -68,8 +68,11 @@ func (ps *ProjectsService) ListProjects(ctx context.Context, opts *ListProjectsO
 // GetProject retrieves a project.
 //
 // Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-projects.html#get-project
-func (ps *ProjectsService) GetProject(ctx context.Context, projectName string) (*ProjectInfo, error) {
-	u := fmt.Sprintf("projects/%s", url.QueryEscape(projectName))
+func (ps *ProjectsService) GetProject(ctx context.Context, projectName string, alreadyEncode ...bool) (*ProjectInfo, error) {
+	if len(alreadyEncode) <= 0 || !alreadyEncode[0] {
+		projectName = url.QueryEscape(projectName)
+	}
+	u := fmt.Sprintf("projects/%s", projectName)
 
 	var project ProjectInfo
 	if _, err := ps.client.InvokeByCredential(ctx, http.MethodGet, u, nil, &project); err != nil {
@@ -77,6 +80,50 @@ func (ps *ProjectsService) GetProject(ctx context.Context, projectName string) (
 	}
 
 	return &project, nil
+}
+
+// GetHEAD retrieves for a project the name of the branch to which HEAD points.
+//
+// Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-projects.html#get-head
+func (ps *ProjectsService) GetHEAD(ctx context.Context, projectName string, alreadyEncode ...bool) (string, error) {
+	if len(alreadyEncode) <= 0 || !alreadyEncode[0] {
+		projectName = url.QueryEscape(projectName)
+	}
+	u := fmt.Sprintf("projects/%s/HEAD", projectName)
+	var head string
+	if _, err := ps.client.InvokeByCredential(ctx, http.MethodGet, u, nil, &head); err != nil {
+		return "", err
+	}
+
+	return head, nil
+}
+
+// RepositoryStatisticsInfo entity contains information about statistics of a Git repository.
+type RepositoryStatisticsInfo struct {
+	NumberOfLooseObjects  int `json:"number_of_loose_objects"`
+	NumberOfLooseRefs     int `json:"number_of_loose_refs"`
+	NumberOfPackFiles     int `json:"number_of_pack_files"`
+	NumberOfPackedObjects int `json:"number_of_packed_objects"`
+	NumberOfPackedRefs    int `json:"number_of_packed_refs"`
+	SizeOfLooseObjects    int `json:"size_of_loose_objects"`
+	SizeOfPackedObjects   int `json:"size_of_packed_objects"`
+}
+
+// GetRepositoryStatistics return statistics for the repository of a project.
+//
+// Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-projects.html#get-repository-statistics
+func (ps *ProjectsService) GetRepositoryStatistics(ctx context.Context, projectName string, alreadyEncode ...bool) (*RepositoryStatisticsInfo, error) {
+	if len(alreadyEncode) <= 0 || !alreadyEncode[0] {
+		projectName = url.QueryEscape(projectName)
+	}
+	u := fmt.Sprintf("projects/%s/statistics.git", projectName)
+
+	var reply RepositoryStatisticsInfo
+	if _, err := ps.client.InvokeByCredential(ctx, http.MethodGet, u, nil, &reply); err != nil {
+		return nil, err
+	}
+
+	return &reply, nil
 }
 
 // CreateProjectOptions entity contains information for the creation of a new project.
