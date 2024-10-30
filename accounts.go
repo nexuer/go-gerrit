@@ -48,10 +48,10 @@ type QueryAccountsOptions struct {
 // The n parameter can be used to limit the returned results.
 //
 // Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-accounts.html#query-accounts
-func (as *AccountsService) QueryAccounts(ctx context.Context, query string, opts *QueryAccountsOptions) ([]*AccountInfo, error) {
+func (s *AccountsService) QueryAccounts(ctx context.Context, query string, opts *QueryAccountsOptions) ([]*AccountInfo, error) {
 	u := fmt.Sprintf("accounts/?q=%s", url.QueryEscape(query))
 	var reply []*AccountInfo
-	if _, err := as.client.InvokeByCredential(ctx, http.MethodGet, u, opts, &reply); err != nil {
+	if _, err := s.client.InvokeByCredential(ctx, http.MethodGet, u, opts, &reply); err != nil {
 		return nil, err
 	}
 	return reply, nil
@@ -70,7 +70,7 @@ type ListAccountsOptions struct {
 // The n parameter can be used to limit the returned results.
 //
 // Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-accounts.html#query-accounts
-func (as *AccountsService) ListAccounts(ctx context.Context, opts *ListAccountsOptions) ([]*AccountInfo, error) {
+func (s *AccountsService) ListAccounts(ctx context.Context, opts *ListAccountsOptions) ([]*AccountInfo, error) {
 	qs := []string{"is:active"}
 	var queryOpts *QueryAccountsOptions
 	if opts != nil {
@@ -85,5 +85,25 @@ func (as *AccountsService) ListAccounts(ctx context.Context, opts *ListAccountsO
 			AdditionalFields: opts.AdditionalFields,
 		}
 	}
-	return as.QueryAccounts(ctx, strings.Join(qs, " OR "), queryOpts)
+	return s.QueryAccounts(ctx, strings.Join(qs, " OR "), queryOpts)
+}
+
+// SetActive Sets the account state to active.
+// Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-accounts.html#set-active
+func (s *AccountsService) SetActive(ctx context.Context, accountID string) error {
+	u := fmt.Sprintf("accounts/%s/active", accountID)
+	if _, err := s.client.InvokeByCredential(ctx, http.MethodPut, u, nil, nil, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteActive Sets the account state to inactive.
+// Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-accounts.html#delete-active
+func (s *AccountsService) DeleteActive(ctx context.Context, accountID string) error {
+	u := fmt.Sprintf("accounts/%s/active", accountID)
+	if _, err := s.client.InvokeByCredential(ctx, http.MethodDelete, u, nil, nil, true); err != nil {
+		return err
+	}
+	return nil
 }

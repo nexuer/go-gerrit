@@ -104,12 +104,20 @@ func (c *Client) SetCredential(credential Credential) {
 
 var magicPrefix = []byte(")]}'\n")
 
-func (c *Client) InvokeByCredential(ctx context.Context, method, path string, args any, reply any) (*http.Response, error) {
+func (c *Client) InvokeByCredential(ctx context.Context, method, path string, args any, reply any,
+	delContentType ...bool) (*http.Response, error) {
 	if c.credential != nil {
 		path = c.credential.AuthURL(path)
 	}
 	callOpts := &ghttp.CallOptions{
 		BeforeHook: func(request *http.Request) error {
+			// errors api:
+			// https://gerrit-review.googlesource.com/Documentation/rest-api-accounts.html#set-active
+			// https://gerrit-review.googlesource.com/Documentation/rest-api-accounts.html#delete-active
+			if len(delContentType) > 0 && delContentType[0] {
+				request.Header.Del("Content-Type")
+			}
+
 			if c.credential != nil {
 				return c.credential.Auth(request)
 			}

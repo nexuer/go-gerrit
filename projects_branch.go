@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"net/url"
 )
 
 // BranchInfo entity contains information about a branch.
@@ -37,10 +36,10 @@ type ListBranchesOptions struct {
 // ListBranches list the branches of a project.
 //
 // Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-projects.html#list-branches
-func (ps *ProjectsService) ListBranches(ctx context.Context, projectName string, opts *ListBranchesOptions) ([]*BranchInfo, error) {
-	u := fmt.Sprintf("projects/%s/branches/", url.QueryEscape(projectName))
+func (s *ProjectsService) ListBranches(ctx context.Context, projectName string, opts *ListBranchesOptions) ([]*BranchInfo, error) {
+	u := fmt.Sprintf("projects/%s/branches/", projectName)
 	var branches []*BranchInfo
-	if _, err := ps.client.InvokeByCredential(ctx, http.MethodGet, u, opts, &branches); err != nil {
+	if _, err := s.client.InvokeByCredential(ctx, http.MethodGet, u, opts, &branches); err != nil {
 		return nil, err
 	}
 	return branches, nil

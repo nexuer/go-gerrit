@@ -12,6 +12,7 @@ func TestChangesService_QueryChanges(t *testing.T) {
 
 	reply, err := client.Changes.QueryChanges(context.Background(), &QueryChangesOptions{
 		ListOptions: NewListOptions(0, 100),
+		//Query:       ptr.Ptr("project:kernel"),
 		//Suggest:     ptr.Ptr(true),
 		//AdditionalFields: []AdditionalField{Details},
 	})

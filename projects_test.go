@@ -14,7 +14,7 @@ func TestProjectsService_ListProjects(t *testing.T) {
 
 	projects, err := client.Projects.ListProjects(context.Background(), &ListProjectsOptions{
 		Description: ptr.Ptr(true),
-		ListOptions: NewListOptions(1, 50),
+		ListOptions: NewListOptions(0, 50),
 	})
 
 	if err != nil {
@@ -22,9 +22,6 @@ func TestProjectsService_ListProjects(t *testing.T) {
 	}
 
 	t.Logf("projects: %v", len(projects))
-	if len(projects) > 0 {
-		t.Logf("first project: \n%+v", projects["11"])
-	}
 }
 
 func TestProjectsService_GetProject(t *testing.T) {

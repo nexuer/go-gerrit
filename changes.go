@@ -201,6 +201,8 @@ type SubmitRequirementResultInfo struct {
 // Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-changes.html#list-changes
 type QueryChangesOptions struct {
 	ListOptions
+
+	Query *string `query:"q,omitempty"`
 }
 
 // QueryChanges lists changes visible to the caller.

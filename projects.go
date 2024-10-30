@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"net/url"
 )
 
 // ProjectsService
@@ -57,9 +56,9 @@ type ListProjectsOptions struct {
 
 // ListProjects gets a list of projects accessible by the authenticated user.
 // Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-projects.html#list-projects
-func (ps *ProjectsService) ListProjects(ctx context.Context, opts *ListProjectsOptions) (map[string]*ProjectInfo, error) {
+func (s *ProjectsService) ListProjects(ctx context.Context, opts *ListProjectsOptions) (map[string]*ProjectInfo, error) {
 	var projects map[string]*ProjectInfo
-	if _, err := ps.client.InvokeByCredential(ctx, http.MethodGet, "projects/", opts, &projects); err != nil {
+	if _, err := s.client.InvokeByCredential(ctx, http.MethodGet, "projects/", opts, &projects); err != nil {
 		return nil, err
 	}
 	return projects, nil
@@ -68,14 +67,11 @@ func (ps *ProjectsService) ListProjects(ctx context.Context, opts *ListProjectsO
 // GetProject retrieves a project.
 //
 // Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-projects.html#get-project
-func (ps *ProjectsService) GetProject(ctx context.Context, projectName string, alreadyEncode ...bool) (*ProjectInfo, error) {
-	if len(alreadyEncode) <= 0 || !alreadyEncode[0] {
-		projectName = url.QueryEscape(projectName)
-	}
+func (s *ProjectsService) GetProject(ctx context.Context, projectName string) (*ProjectInfo, error) {
 	u := fmt.Sprintf("projects/%s", projectName)
 
 	var project ProjectInfo
-	if _, err := ps.client.InvokeByCredential(ctx, http.MethodGet, u, nil, &project); err != nil {
+	if _, err := s.client.InvokeByCredential(ctx, http.MethodGet, u, nil, &project); err != nil {
 		return nil, err
 	}
 
@@ -85,13 +81,10 @@ func (ps *ProjectsService) GetProject(ctx context.Context, projectName string, a
 // GetHEAD retrieves for a project the name of the branch to which HEAD points.
 //
 // Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-projects.html#get-head
-func (ps *ProjectsService) GetHEAD(ctx context.Context, projectName string, alreadyEncode ...bool) (string, error) {
-	if len(alreadyEncode) <= 0 || !alreadyEncode[0] {
-		projectName = url.QueryEscape(projectName)
-	}
+func (s *ProjectsService) GetHEAD(ctx context.Context, projectName string) (string, error) {
 	u := fmt.Sprintf("projects/%s/HEAD", projectName)
 	var head string
-	if _, err := ps.client.InvokeByCredential(ctx, http.MethodGet, u, nil, &head); err != nil {
+	if _, err := s.client.InvokeByCredential(ctx, http.MethodGet, u, nil, &head); err != nil {
 		return "", err
 	}
 
@@ -112,14 +105,11 @@ type RepositoryStatisticsInfo struct {
 // GetRepositoryStatistics return statistics for the repository of a project.
 //
 // Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-projects.html#get-repository-statistics
-func (ps *ProjectsService) GetRepositoryStatistics(ctx context.Context, projectName string, alreadyEncode ...bool) (*RepositoryStatisticsInfo, error) {
-	if len(alreadyEncode) <= 0 || !alreadyEncode[0] {
-		projectName = url.QueryEscape(projectName)
-	}
+func (s *ProjectsService) GetRepositoryStatistics(ctx context.Context, projectName string) (*RepositoryStatisticsInfo, error) {
 	u := fmt.Sprintf("projects/%s/statistics.git", projectName)
 
 	var reply RepositoryStatisticsInfo
-	if _, err := ps.client.InvokeByCredential(ctx, http.MethodGet, u, nil, &reply); err != nil {
+	if _, err := s.client.InvokeByCredential(ctx, http.MethodGet, u, nil, &reply); err != nil {
 		return nil, err
 	}
 
@@ -150,11 +140,11 @@ type CreateProjectOptions struct {
 // CreateProject creates a new project.
 //
 // Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-projects.html#create-project
-func (ps *ProjectsService) CreateProject(ctx context.Context, projectName string, opts *CreateProjectOptions) (*ProjectInfo, error) {
-	u := fmt.Sprintf("projects/%s/", url.QueryEscape(projectName))
+func (s *ProjectsService) CreateProject(ctx context.Context, projectName string, opts *CreateProjectOptions) (*ProjectInfo, error) {
+	u := fmt.Sprintf("projects/%s/", projectName)
 
 	var project ProjectInfo
-	if _, err := ps.client.InvokeByCredential(ctx, http.MethodPut, u, opts, &project); err != nil {
+	if _, err := s.client.InvokeByCredential(ctx, http.MethodPut, u, opts, &project); err != nil {
 		return nil, err
 	}
 
