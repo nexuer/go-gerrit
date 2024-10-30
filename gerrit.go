@@ -32,6 +32,7 @@ type Client struct {
 
 	common   service
 	Projects *ProjectsService
+	Accounts *AccountsService
 }
 
 func NewClient(credential Credential, opts ...*Options) *Client {
@@ -47,6 +48,7 @@ func NewClient(credential Credential, opts ...*Options) *Client {
 
 	c.common.client = c
 	c.Projects = (*ProjectsService)(&c.common)
+	c.Accounts = (*AccountsService)(&c.common)
 
 	c.SetCredential(credential)
 	return c
