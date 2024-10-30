@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+const MetaConfigRef = "refs/meta/config"
 const HeadRef = "HEAD"
 
 // RevisionKind describes the change kind.

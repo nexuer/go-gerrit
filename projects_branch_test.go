@@ -38,3 +38,18 @@ func TestProjectsService_GetBranch(t *testing.T) {
 
 	t.Logf("branches: %v", branch)
 }
+
+func TestProjectsService_GetBranchContent(t *testing.T) {
+	client := NewClient(testPasswordCredential, &Options{
+		Debug: true,
+	})
+
+	content, err := client.Projects.GetBranchContent(context.Background(), "",
+		"", "")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("content: %v", content)
+}
