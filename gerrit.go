@@ -3,6 +3,7 @@ package gerrit
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"io"
 	"net/http"
 	"net/url"
@@ -20,6 +21,8 @@ type Options struct {
 	Timeout   time.Duration
 	Proxy     func(*http.Request) (*url.URL, error)
 	Debug     bool
+	TLS       *tls.Config
+	Limiter   ghttp.Limiter
 }
 
 type Client struct {
@@ -64,6 +67,18 @@ func (c *Client) parseOptions(opts ...*Options) []ghttp.ClientOption {
 
 	if opt.Timeout > 0 {
 		clientOpts = append(clientOpts, ghttp.WithTimeout(opt.Timeout))
+	}
+
+	if opt.Proxy != nil {
+		clientOpts = append(clientOpts, ghttp.WithProxy(opt.Proxy))
+	}
+
+	if opt.TLS != nil {
+		clientOpts = append(clientOpts, ghttp.WithTLSConfig(opt.TLS))
+	}
+
+	if opt.Limiter != nil {
+		clientOpts = append(clientOpts, ghttp.WithLimiter(opt.Limiter))
 	}
 
 	return clientOpts

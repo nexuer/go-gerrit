@@ -17,7 +17,7 @@ func TestPasswordCredential(t *testing.T) {
 		Debug: true,
 	})
 
-	projects, err := client.Projects.ListProjects(context.Background(), &ListProjectsOptions{})
+	projects, err := client.Projects.ListProjects(context.Background(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
