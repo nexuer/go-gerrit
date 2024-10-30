@@ -15,6 +15,7 @@ func TestProjectsService_ListProjects(t *testing.T) {
 	projects, err := client.Projects.ListProjects(context.Background(), &ListProjectsOptions{
 		Description: ptr.Ptr(true),
 		ListOptions: NewListOptions(0, 50),
+		Tree:        ptr.Ptr(true),
 	})
 
 	if err != nil {
