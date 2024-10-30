@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strings"
 )
 
 // AccountsService
@@ -37,8 +39,8 @@ type AccountInfo struct {
 type QueryAccountsOptions struct {
 	ListOptions `query:",inline,omitempty"`
 
-	AdditionalFields []string `query:"o,omitempty"`
-	Suggest          *bool    `query:"suggest,omitempty"`
+	AdditionalFields []AdditionalField `query:"o,omitempty"`
+	Suggest          *bool             `query:"suggest,omitempty"`
 }
 
 // QueryAccounts lists accounts visible to the caller.
@@ -47,10 +49,41 @@ type QueryAccountsOptions struct {
 //
 // Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-accounts.html#query-accounts
 func (as *AccountsService) QueryAccounts(ctx context.Context, query string, opts *QueryAccountsOptions) ([]*AccountInfo, error) {
-	u := fmt.Sprintf("accounts/?q=%s", query)
+	u := fmt.Sprintf("accounts/?q=%s", url.QueryEscape(query))
 	var reply []*AccountInfo
 	if _, err := as.client.InvokeByCredential(ctx, http.MethodGet, u, opts, &reply); err != nil {
 		return nil, err
 	}
 	return reply, nil
+}
+
+type ListAccountsOptions struct {
+	ListOptions
+
+	Active           *bool
+	Inactive         *bool
+	AdditionalFields []AdditionalField
+}
+
+// ListAccounts lists accounts visible to the caller.
+// The query string must be provided by the q parameter.
+// The n parameter can be used to limit the returned results.
+//
+// Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-accounts.html#query-accounts
+func (as *AccountsService) ListAccounts(ctx context.Context, opts *ListAccountsOptions) ([]*AccountInfo, error) {
+	qs := []string{"is:active"}
+	var queryOpts *QueryAccountsOptions
+	if opts != nil {
+		if opts.Active != nil && *opts.Active == false {
+			qs = []string{}
+		}
+		if opts.Inactive != nil && *opts.Inactive {
+			qs = append(qs, "is:inactive")
+		}
+		queryOpts = &QueryAccountsOptions{
+			ListOptions:      opts.ListOptions,
+			AdditionalFields: opts.AdditionalFields,
+		}
+	}
+	return as.QueryAccounts(ctx, strings.Join(qs, " OR "), queryOpts)
 }

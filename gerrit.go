@@ -170,16 +170,45 @@ type ListOptions struct {
 
 const defaultLimit = 25
 
-func NewListOptions(s int, l ...int) ListOptions {
-	if s <= 0 {
-		s = 1
-	}
-	ll := defaultLimit
-	if len(l) > 0 && l[0] > 0 {
-		ll = l[0]
+func NewListOptions(skip int, limits ...int) ListOptions {
+	l := defaultLimit
+	if len(limits) > 0 && limits[0] > 0 {
+		l = limits[0]
 	}
 	return ListOptions{
-		Skip:  s,
-		Limit: ll,
+		Skip:  skip,
+		Limit: l,
 	}
+}
+
+func IsNotFound(err error) bool {
+	code, ok := StatusForErr(err)
+	if ok && code == http.StatusNotFound {
+		return true
+	}
+	return false
+}
+
+func IsForbidden(err error) bool {
+	code, ok := StatusForErr(err)
+	if ok && code == http.StatusForbidden {
+		return true
+	}
+	return false
+}
+
+func IsUnauthorized(err error) bool {
+	code, ok := StatusForErr(err)
+	if ok && code == http.StatusUnauthorized {
+		return true
+	}
+	return false
+}
+
+func IsTimeout(err error) bool {
+	return ghttp.IsTimeout(err)
+}
+
+func StatusForErr(err error) (int, bool) {
+	return ghttp.StatusForErr(err)
 }

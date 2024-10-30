@@ -11,22 +11,6 @@ import (
 // Gerrit API Docs: https://gerrit-review.googlesource.com/Documentation/rest-api-projects.html
 type ProjectsService service
 
-type ProjectState string
-
-const (
-	Active   ProjectState = "ACTIVE"
-	ReadOnly ProjectState = "READ_ONLY"
-	Hidden   ProjectState = "HIDDEN"
-)
-
-type ProjectType string
-
-const (
-	All         ProjectType = "ALL"
-	Code        ProjectType = "CODE"
-	Permissions ProjectType = "PERMISSIONS"
-)
-
 // ProjectInfo entity contains information about a project.
 //
 // Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-projects.html#project-info
