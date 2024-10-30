@@ -2,6 +2,7 @@ package gerrit
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/nexuer/utils/ptr"
@@ -15,7 +16,7 @@ func TestProjectsService_ListProjects(t *testing.T) {
 	projects, err := client.Projects.ListProjects(context.Background(), &ListProjectsOptions{
 		Description: ptr.Ptr(true),
 		ListOptions: NewListOptions(0, 50),
-		Tree:        ptr.Ptr(true),
+		All:         ptr.Ptr(true),
 	})
 
 	if err != nil {
@@ -23,6 +24,8 @@ func TestProjectsService_ListProjects(t *testing.T) {
 	}
 
 	t.Logf("projects: %v", len(projects))
+
+	fmt.Println(projects["All-Projects"].State)
 }
 
 func TestProjectsService_GetProject(t *testing.T) {
