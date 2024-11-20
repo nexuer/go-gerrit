@@ -3,8 +3,9 @@ package gerrit
 import (
 	"context"
 	"fmt"
-	"github.com/nexuer/utils/ptr"
 	"testing"
+
+	"github.com/nexuer/go-gerrit/query"
 )
 
 func TestAccountsService_QueryAccounts(t *testing.T) {
@@ -12,10 +13,14 @@ func TestAccountsService_QueryAccounts(t *testing.T) {
 		Debug: true,
 	})
 
-	reply, err := client.Accounts.QueryAccounts(context.Background(), "is:active OR is:inactive", &QueryAccountsOptions{
-		ListOptions: NewListOptions(0, 100),
-		//Suggest:     ptr.Ptr(true),
-		AdditionalFields: []AdditionalField{Details},
+	q := query.Or(
+		query.F("is", "active"),
+		query.F("is", "inactive"),
+	)
+
+	reply, err := client.Accounts.QueryAccounts(context.Background(), q.String(), &QueryAccountsOptions{
+		ListOptions:      NewListOptions(0, 100),
+		AdditionalFields: []AccountAdditionalField{Details},
 	})
 
 	if err != nil {
@@ -75,10 +80,9 @@ func TestAccountsService_ListAccounts(t *testing.T) {
 	})
 
 	reply, err := client.Accounts.ListAccounts(context.Background(), &ListAccountsOptions{
-		ListOptions: NewListOptions(0, 100),
-		Inactive:    ptr.Ptr(true),
-		//Active:           ptr.Ptr(false),
-		AdditionalFields: []AdditionalField{Details},
+		ListOptions:     NewListOptions(0, 100),
+		IncludeInactive: true,
+		//ExcludeActive:    true,
 	})
 
 	if err != nil {

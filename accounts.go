@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
+
+	"github.com/nexuer/go-gerrit/query"
 )
 
 // AccountsService
@@ -39,8 +40,8 @@ type AccountInfo struct {
 type QueryAccountsOptions struct {
 	ListOptions `query:",inline,omitempty"`
 
-	AdditionalFields []AdditionalField `query:"o,omitempty"`
-	Suggest          *bool             `query:"suggest,omitempty"`
+	AdditionalFields []AccountAdditionalField `query:"o,omitempty"`
+	Suggest          *bool                    `query:"suggest,omitempty"`
 }
 
 // QueryAccounts lists accounts visible to the caller.
@@ -71,12 +72,18 @@ func (s *AccountsService) GetAccount(ctx context.Context, account string) (*Acco
 	return &reply, nil
 }
 
+type AccountAdditionalField string
+
+const (
+	Details   AccountAdditionalField = "DETAILS"
+	AllEmails AccountAdditionalField = "ALL_EMAILS"
+)
+
 type ListAccountsOptions struct {
 	ListOptions
 
-	Active           *bool
-	Inactive         *bool
-	AdditionalFields []AdditionalField
+	ExcludeActive   bool
+	IncludeInactive bool
 }
 
 // ListAccounts lists accounts visible to the caller.
@@ -85,21 +92,23 @@ type ListAccountsOptions struct {
 //
 // Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-accounts.html#query-accounts
 func (s *AccountsService) ListAccounts(ctx context.Context, opts *ListAccountsOptions) ([]*AccountInfo, error) {
-	qs := []string{"is:active"}
+	f := []query.Query{
+		query.Raw("is:active"),
+	}
 	var queryOpts *QueryAccountsOptions
 	if opts != nil {
-		if opts.Active != nil && *opts.Active == false {
-			qs = []string{}
+		if opts.ExcludeActive {
+			f = []query.Query{}
 		}
-		if opts.Inactive != nil && *opts.Inactive {
-			qs = append(qs, "is:inactive")
+		if opts.IncludeInactive {
+			f = append(f, query.Raw("is:inactive"))
 		}
 		queryOpts = &QueryAccountsOptions{
 			ListOptions:      opts.ListOptions,
-			AdditionalFields: opts.AdditionalFields,
+			AdditionalFields: []AccountAdditionalField{AllEmails, Details},
 		}
 	}
-	return s.QueryAccounts(ctx, strings.Join(qs, " OR "), queryOpts)
+	return s.QueryAccounts(ctx, query.Or(f...).String(), queryOpts)
 }
 
 // SetActive Sets the account state to active.

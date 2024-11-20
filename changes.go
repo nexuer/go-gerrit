@@ -2,7 +2,6 @@ package gerrit
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 )
 
@@ -196,13 +195,43 @@ type SubmitRequirementResultInfo struct {
 	OverrideExpressionResult       SubmitRequirementExpressionInfo `json:"override_expression_result,omitempty"`
 }
 
+type AdditionalField string
+
+const (
+	Labels           AdditionalField = "LABELS"
+	DetailedLabels   AdditionalField = "DETAILED_LABELS"
+	CurrentRevision  AdditionalField = "CURRENT_REVISION"
+	AllRevisions     AdditionalField = "ALL_REVISIONS"
+	DownloadCommands AdditionalField = "DOWNLOAD_COMMANDS"
+	CurrentCommit    AdditionalField = "CURRENT_COMMIT"
+	AllCommits       AdditionalField = "ALL_COMMITS"
+	CurrentFiles     AdditionalField = "CURRENT_FILES"
+	AllFiles         AdditionalField = "ALL_FILES"
+	DetailedAccounts AdditionalField = "DETAILED_ACCOUNTS"
+	ReviewerUpdates  AdditionalField = "REVIEWER_UPDATES"
+	Messages         AdditionalField = "MESSAGES"
+	CurrentActions   AdditionalField = "CURRENT_ACTIONS"
+	ChangeActions    AdditionalField = "CHANGE_ACTIONS"
+	REVIEWED         AdditionalField = "REVIEWED"
+	SkipMergeable    AdditionalField = "SKIP_MERGEABLE"
+	SkipDiffstat     AdditionalField = "SKIP_DIFFSTAT"
+	SUBMITTABLE      AdditionalField = "SUBMITTABLE"
+	WebLinks         AdditionalField = "WEB_LINKS"
+	CHECK            AdditionalField = "CHECK"
+	CommitFooters    AdditionalField = "COMMIT_FOOTERS"
+	PushCertificates AdditionalField = "PUSH_CERTIFICATES"
+	TrackingIds      AdditionalField = "TRACKING_IDS"
+	NoLimit          AdditionalField = "NO-LIMIT"
+)
+
 // QueryChangesOptions specifies the parameters to the ChangesService.QueryChanges.
 //
 // Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-changes.html#list-changes
 type QueryChangesOptions struct {
 	ListOptions
 
-	Query *string `query:"q,omitempty"`
+	Query            *string           `query:"q,omitempty"`
+	AdditionalFields []AdditionalField `query:"o,omitempty"`
 }
 
 // QueryChanges lists changes visible to the caller.
@@ -213,9 +242,8 @@ type QueryChangesOptions struct {
 //
 // Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-changes.html#list-changes
 func (s *ChangesService) QueryChanges(ctx context.Context, opts *QueryChangesOptions) ([]*ChangeInfo, error) {
-	u := fmt.Sprintf("changes/%s", "")
 	var reply []*ChangeInfo
-	if _, err := s.client.InvokeByCredential(ctx, http.MethodGet, u, opts, &reply); err != nil {
+	if _, err := s.client.InvokeByCredential(ctx, http.MethodGet, "changes/", opts, &reply); err != nil {
 		return nil, err
 	}
 	return reply, nil

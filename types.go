@@ -37,13 +37,6 @@ const (
 	Permissions ProjectType = "PERMISSIONS"
 )
 
-type AdditionalField string
-
-const (
-	Details   AdditionalField = "DETAILS"
-	AllEmails AdditionalField = "ALL_EMAILS"
-)
-
 // Gerrit's timestamp layout is like time.RFC3339Nano, but with a space instead
 // of the "T", without a timezone (it's always in UTC), and always includes nanoseconds.
 // See https://gerrit-review.googlesource.com/Documentation/rest-api.html#timestamp.
