@@ -2,9 +2,9 @@ package gerrit
 
 import (
 	"context"
+	"fmt"
 	"testing"
-
-	"github.com/nexuer/go-gerrit/query"
+	"time"
 
 	"github.com/nexuer/utils/ptr"
 )
@@ -14,10 +14,12 @@ func TestChangesService_QueryChanges(t *testing.T) {
 		Debug: true,
 	})
 
-	q := query.Or(
-		query.Raw("status:open"),
-		query.Raw("status:merged"),
-		query.Raw("status:abandoned"),
+	q := And(
+		Or(
+			F("status", "open"),
+			F("status", "merged"),
+		),
+		F("since", T(time.Date(2024, 11, 19, 8, 51, 36, 0, time.UTC))),
 	)
 
 	reply, err := client.Changes.QueryChanges(context.Background(), &QueryChangesOptions{
@@ -29,6 +31,14 @@ func TestChangesService_QueryChanges(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	t.Logf("reply: %v", len(reply))
+	for _, change := range reply {
+		if len(change.Revisions) > 0 {
+			for _, r := range change.Revisions {
+				fmt.Println("commit_id:",
+					r.Commit.Committer.Date.Local().Format(time.RFC3339),
+				)
+			}
+		}
+	}
 }

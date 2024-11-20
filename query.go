@@ -1,8 +1,9 @@
-package query
+package gerrit
 
 import (
 	"strconv"
 	"strings"
+	"time"
 	"unicode"
 	"unicode/utf8"
 )
@@ -211,4 +212,11 @@ func Not(query Query) Query {
 
 func Raw(str string) Query {
 	return raw{str}
+}
+
+func T(t time.Time) string {
+	if t.Location() == time.UTC {
+		return t.Format("2006-01-02 15:04:05.000")
+	}
+	return t.Format("2006-01-02 15:04:05.000 -0700")
 }

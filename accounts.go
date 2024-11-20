@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-
-	"github.com/nexuer/go-gerrit/query"
 )
 
 // AccountsService
@@ -92,23 +90,23 @@ type ListAccountsOptions struct {
 //
 // Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-accounts.html#query-accounts
 func (s *AccountsService) ListAccounts(ctx context.Context, opts *ListAccountsOptions) ([]*AccountInfo, error) {
-	f := []query.Query{
-		query.Raw("is:active"),
+	f := []Query{
+		Raw("is:active"),
 	}
 	var queryOpts *QueryAccountsOptions
 	if opts != nil {
 		if opts.ExcludeActive {
-			f = []query.Query{}
+			f = []Query{}
 		}
 		if opts.IncludeInactive {
-			f = append(f, query.Raw("is:inactive"))
+			f = append(f, Raw("is:inactive"))
 		}
 		queryOpts = &QueryAccountsOptions{
 			ListOptions:      opts.ListOptions,
 			AdditionalFields: []AccountAdditionalField{AllEmails, Details},
 		}
 	}
-	return s.QueryAccounts(ctx, query.Or(f...).String(), queryOpts)
+	return s.QueryAccounts(ctx, Or(f...).String(), queryOpts)
 }
 
 // SetActive Sets the account state to active.

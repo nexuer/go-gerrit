@@ -1,7 +1,5 @@
 package gerrit
 
-import "time"
-
 // ActionInfo entity describes a REST API call the client can make to manipulate a resource.
 // These are frequently implemented by plugins and may be discovered at runtime.
 type ActionInfo struct {
@@ -28,12 +26,4 @@ type GitPersonInfo struct {
 	Email string    `json:"email"`
 	Date  Timestamp `json:"date"`
 	TZ    int       `json:"tz"`
-}
-
-func (g GitPersonInfo) GoTime() time.Time {
-	if g.TZ == 0 {
-		return g.Date.UTC()
-	}
-	location := time.FixedZone("Custom", g.TZ*60)
-	return g.Date.In(location)
 }

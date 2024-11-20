@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"testing"
-
-	"github.com/nexuer/go-gerrit/query"
 )
 
 func TestAccountsService_QueryAccounts(t *testing.T) {
@@ -13,9 +11,9 @@ func TestAccountsService_QueryAccounts(t *testing.T) {
 		Debug: true,
 	})
 
-	q := query.Or(
-		query.F("is", "active"),
-		query.F("is", "inactive"),
+	q := Or(
+		F("is", "active"),
+		F("is", "inactive"),
 	)
 
 	reply, err := client.Accounts.QueryAccounts(context.Background(), q.String(), &QueryAccountsOptions{
