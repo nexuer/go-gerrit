@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
+	"errors"
 	"io"
 	"net/http"
 	"net/url"
@@ -108,31 +109,41 @@ func (c *Client) SetCredential(credential Credential) {
 var magicPrefix = []byte(")]}'\n")
 
 func (c *Client) InvokeWithCredential(ctx context.Context, method, path string, args any, reply any, fn ...ghttp.RequestFunc) (*http.Response, error) {
-	defaultHook := &callHook{
-		cre: c.credential,
-		CallOptions: &ghttp.CallOptions{
-			BeforeHooks: fn,
-		},
+	if c.credential == nil {
+		return nil, errors.New("invalid credential")
 	}
-	if method == http.MethodGet && args != nil {
-		defaultHook.CallOptions.Query = args
-		args = nil
+	fns := make([]ghttp.RequestFunc, 1, len(fn)+1)
+	fns[0] = func(request *http.Request) error {
+		return c.credential.Auth(request)
 	}
-	return c.cc.Invoke(ctx, method, path, args, reply, defaultHook)
+	fns = append(fns, fn...)
+	return c.Invoke(ctx, method, authUrl(path), args, reply, fns...)
 }
 
 func (c *Client) Invoke(ctx context.Context, method, path string, args any, reply any, fn ...ghttp.RequestFunc) (*http.Response, error) {
-	defaultHook := &callHook{
-		cre: c.credential,
-		CallOptions: &ghttp.CallOptions{
-			BeforeHooks: fn,
+	opts := &ghttp.CallOptions{
+		BeforeHooks: fn,
+		AfterHooks: []ghttp.ResponseFunc{
+			// Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api.html#output
+			func(response *http.Response) error {
+				all, err := io.ReadAll(response.Body)
+				if err != nil {
+					return err
+				}
+				_ = response.Body.Close()
+				if bytes.HasPrefix(all, magicPrefix) {
+					all = all[len(magicPrefix):]
+				}
+				response.Body = io.NopCloser(bytes.NewReader(all))
+				return nil
+			},
 		},
 	}
 	if method == http.MethodGet && args != nil {
-		defaultHook.CallOptions.Query = args
+		opts.Query = args
 		args = nil
 	}
-	return c.cc.Invoke(ctx, method, path, args, reply, defaultHook)
+	return c.cc.Invoke(ctx, method, path, args, reply, opts)
 }
 
 func DelContentType() ghttp.RequestFunc {
@@ -147,42 +158,6 @@ func PlainText(body string) ghttp.RequestFunc {
 		req.Header.Set("Content-Type", "text/plain")
 		return ghttp.SetRequestBody(req, strings.NewReader(body))
 	}
-}
-
-type callHook struct {
-	*ghttp.CallOptions
-	cre Credential
-}
-
-func (c callHook) Before(request *http.Request) error {
-	if c.cre != nil {
-		request.URL.Path = authUrl(request.URL.Path)
-	}
-
-	if err := c.CallOptions.Before(request); err != nil {
-		return err
-	}
-
-	if c.cre != nil {
-		return c.cre.Auth(request)
-	}
-
-	return nil
-}
-
-// After
-// Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api.html#output
-func (c callHook) After(response *http.Response) error {
-	all, err := io.ReadAll(response.Body)
-	if err != nil {
-		return err
-	}
-	_ = response.Body.Close()
-	if bytes.HasPrefix(all, magicPrefix) {
-		all = all[len(magicPrefix):]
-	}
-	response.Body = io.NopCloser(bytes.NewReader(all))
-	return nil
 }
 
 type Error struct {
