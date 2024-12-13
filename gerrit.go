@@ -163,7 +163,11 @@ func (c callHook) Before(request *http.Request) error {
 		return err
 	}
 
-	return c.cre.Auth(request)
+	if c.cre != nil {
+		return c.cre.Auth(request)
+	}
+
+	return nil
 }
 
 // After
