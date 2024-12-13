@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/nexuer/ghttp"
@@ -106,54 +107,78 @@ func (c *Client) SetCredential(credential Credential) {
 
 var magicPrefix = []byte(")]}'\n")
 
-func (c *Client) InvokeByCredential(ctx context.Context, method, path string, args any, reply any,
-	delContentType ...bool) (*http.Response, error) {
-	if c.credential != nil {
-		path = c.credential.AuthURL(path)
-	}
-	callOpts := &ghttp.CallOptions{
-		BeforeHook: func(request *http.Request) error {
-			// errors api:
-			// https://gerrit-review.googlesource.com/Documentation/rest-api-accounts.html#set-active
-			// https://gerrit-review.googlesource.com/Documentation/rest-api-accounts.html#delete-active
-			if len(delContentType) > 0 && delContentType[0] {
-				request.Header.Del("Content-Type")
-			}
-
-			if c.credential != nil {
-				return c.credential.Auth(request)
-			}
-			return nil
+func (c *Client) InvokeWithCredential(ctx context.Context, method, path string, args any, reply any, fn ...ghttp.RequestFunc) (*http.Response, error) {
+	defaultHook := &callHook{
+		cre: c.credential,
+		CallOptions: &ghttp.CallOptions{
+			BeforeHooks: fn,
 		},
 	}
-	return c.Invoke(ctx, method, path, args, reply, callOpts)
-}
-
-func (c *Client) Invoke(ctx context.Context, method, path string, args any, reply any, callOpts ...*ghttp.CallOptions) (*http.Response, error) {
-	callOpt := &ghttp.CallOptions{}
-	if len(callOpts) > 0 && callOpts[0] != nil {
-		callOpt = callOpts[0]
-	}
-
 	if method == http.MethodGet && args != nil {
-		callOpt.Query = args
+		defaultHook.CallOptions.Query = args
 		args = nil
 	}
-	// Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api.html#output
-	callOpt.AfterHook = func(response *http.Response) error {
-		all, err := io.ReadAll(response.Body)
-		if err != nil {
-			return err
-		}
-		_ = response.Body.Close()
-		if bytes.HasPrefix(all, magicPrefix) {
-			all = all[len(magicPrefix):]
-		}
-		response.Body = io.NopCloser(bytes.NewReader(all))
+	return c.cc.Invoke(ctx, method, path, args, reply, defaultHook)
+}
+
+func (c *Client) Invoke(ctx context.Context, method, path string, args any, reply any, fn ...ghttp.RequestFunc) (*http.Response, error) {
+	defaultHook := &callHook{
+		cre: c.credential,
+		CallOptions: &ghttp.CallOptions{
+			BeforeHooks: fn,
+		},
+	}
+	if method == http.MethodGet && args != nil {
+		defaultHook.CallOptions.Query = args
+		args = nil
+	}
+	return c.cc.Invoke(ctx, method, path, args, reply, defaultHook)
+}
+
+func DelContentType() ghttp.RequestFunc {
+	return func(req *http.Request) error {
+		req.Header.Del("Content-Type")
 		return nil
 	}
+}
 
-	return c.cc.Invoke(ctx, method, path, args, reply, callOpt)
+func PlainText(body string) ghttp.RequestFunc {
+	return func(req *http.Request) error {
+		req.Header.Set("Content-Type", "text/plain")
+		return ghttp.SetRequestBody(req, strings.NewReader(body))
+	}
+}
+
+type callHook struct {
+	*ghttp.CallOptions
+	cre Credential
+}
+
+func (c callHook) Before(request *http.Request) error {
+	if c.cre != nil {
+		request.URL.Path = authUrl(request.URL.Path)
+	}
+
+	if err := c.CallOptions.Before(request); err != nil {
+		return err
+	}
+
+	return c.cre.Auth(request)
+}
+
+// After
+// Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api.html#output
+func (c callHook) After(response *http.Response) error {
+	all, err := io.ReadAll(response.Body)
+	if err != nil {
+		return err
+	}
+	_ = response.Body.Close()
+	if bytes.HasPrefix(all, magicPrefix) {
+		all = all[len(magicPrefix):]
+	}
+	response.Body = io.NopCloser(bytes.NewReader(all))
+	return nil
 }
 
 type Error struct {
@@ -161,6 +186,14 @@ type Error struct {
 }
 
 func (e *Error) UnmarshalJSON(data []byte) error {
+	if len(data) == 0 {
+		return nil
+	}
+	e.msg = string(data)
+	return nil
+}
+
+func (e *Error) UnmarshalText(data []byte) error {
 	if len(data) == 0 {
 		return nil
 	}

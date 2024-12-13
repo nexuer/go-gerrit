@@ -243,7 +243,7 @@ type QueryChangesOptions struct {
 // Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-changes.html#list-changes
 func (s *ChangesService) QueryChanges(ctx context.Context, opts *QueryChangesOptions) ([]*ChangeInfo, error) {
 	var reply []*ChangeInfo
-	if _, err := s.client.InvokeByCredential(ctx, http.MethodGet, "changes/", opts, &reply); err != nil {
+	if _, err := s.client.InvokeWithCredential(ctx, http.MethodGet, "changes/", opts, &reply); err != nil {
 		return nil, err
 	}
 	return reply, nil

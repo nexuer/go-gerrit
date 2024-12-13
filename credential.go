@@ -7,7 +7,6 @@ import (
 
 type Credential interface {
 	GetEndpoint() string
-	AuthURL(path string) string
 	Auth(req *http.Request) error
 }
 
@@ -26,13 +25,13 @@ func (p *PasswordCredential) Auth(req *http.Request) error {
 	return nil
 }
 
-func (p *PasswordCredential) AuthURL(path string) string {
-	if !HasAuthURL(path) {
-		return "a/" + path
-	}
-	return path
+func hasAuthURL(path string) bool {
+	return strings.HasPrefix(path, "a/") || strings.HasPrefix(path, "/a/")
 }
 
-func HasAuthURL(path string) bool {
-	return strings.HasPrefix(path, "a/") || strings.HasPrefix(path, "/a/")
+func authUrl(path string) string {
+	if strings.HasPrefix(path, "a/") || strings.HasPrefix(path, "/a/") {
+		return path
+	}
+	return "/a/" + strings.TrimPrefix(path, "/")
 }

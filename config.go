@@ -17,7 +17,7 @@ func (s *ConfigService) GetVersion(ctx context.Context) (string, error) {
 	u := "config/server/version"
 
 	var reply string
-	if _, err := s.client.InvokeByCredential(ctx, http.MethodGet, u, nil, &reply); err != nil {
+	if _, err := s.client.InvokeWithCredential(ctx, http.MethodGet, u, nil, &reply); err != nil {
 		return "", err
 	}
 
@@ -119,7 +119,7 @@ func (s *ConfigService) GetServerInfo(ctx context.Context) (*ServerInfo, error) 
 	u := "config/server/info"
 
 	var reply ServerInfo
-	if _, err := s.client.InvokeByCredential(ctx, http.MethodGet, u, nil, &reply); err != nil {
+	if _, err := s.client.InvokeWithCredential(ctx, http.MethodGet, u, nil, &reply); err != nil {
 		return nil, err
 	}
 

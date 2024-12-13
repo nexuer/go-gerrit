@@ -58,7 +58,7 @@ type ListProjectsOptions struct {
 // Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-projects.html#list-projects
 func (s *ProjectsService) ListProjects(ctx context.Context, opts *ListProjectsOptions) (map[string]*ProjectInfo, error) {
 	var projects map[string]*ProjectInfo
-	if _, err := s.client.InvokeByCredential(ctx, http.MethodGet, "projects/", opts, &projects); err != nil {
+	if _, err := s.client.InvokeWithCredential(ctx, http.MethodGet, "projects/", opts, &projects); err != nil {
 		return nil, err
 	}
 	return projects, nil
@@ -71,7 +71,7 @@ func (s *ProjectsService) GetProject(ctx context.Context, projectName string) (*
 	u := fmt.Sprintf("projects/%s", projectName)
 
 	var project ProjectInfo
-	if _, err := s.client.InvokeByCredential(ctx, http.MethodGet, u, nil, &project); err != nil {
+	if _, err := s.client.InvokeWithCredential(ctx, http.MethodGet, u, nil, &project); err != nil {
 		return nil, err
 	}
 
@@ -84,7 +84,7 @@ func (s *ProjectsService) GetProject(ctx context.Context, projectName string) (*
 func (s *ProjectsService) GetHEAD(ctx context.Context, projectName string) (string, error) {
 	u := fmt.Sprintf("projects/%s/HEAD", projectName)
 	var head string
-	if _, err := s.client.InvokeByCredential(ctx, http.MethodGet, u, nil, &head); err != nil {
+	if _, err := s.client.InvokeWithCredential(ctx, http.MethodGet, u, nil, &head); err != nil {
 		return "", err
 	}
 
@@ -109,7 +109,7 @@ func (s *ProjectsService) GetRepositoryStatistics(ctx context.Context, projectNa
 	u := fmt.Sprintf("projects/%s/statistics.git", projectName)
 
 	var reply RepositoryStatisticsInfo
-	if _, err := s.client.InvokeByCredential(ctx, http.MethodGet, u, nil, &reply); err != nil {
+	if _, err := s.client.InvokeWithCredential(ctx, http.MethodGet, u, nil, &reply); err != nil {
 		return nil, err
 	}
 
@@ -144,7 +144,7 @@ func (s *ProjectsService) CreateProject(ctx context.Context, projectName string,
 	u := fmt.Sprintf("projects/%s/", projectName)
 
 	var project ProjectInfo
-	if _, err := s.client.InvokeByCredential(ctx, http.MethodPut, u, opts, &project); err != nil {
+	if _, err := s.client.InvokeWithCredential(ctx, http.MethodPut, u, opts, &project); err != nil {
 		return nil, err
 	}
 

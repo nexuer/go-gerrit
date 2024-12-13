@@ -50,7 +50,7 @@ type QueryAccountsOptions struct {
 func (s *AccountsService) QueryAccounts(ctx context.Context, query string, opts *QueryAccountsOptions) ([]*AccountInfo, error) {
 	u := fmt.Sprintf("accounts/?q=%s", url.QueryEscape(query))
 	var reply []*AccountInfo
-	if _, err := s.client.InvokeByCredential(ctx, http.MethodGet, u, opts, &reply); err != nil {
+	if _, err := s.client.InvokeWithCredential(ctx, http.MethodGet, u, opts, &reply); err != nil {
 		return nil, err
 	}
 	return reply, nil
@@ -64,7 +64,7 @@ func (s *AccountsService) GetAccount(ctx context.Context, account string) (*Acco
 	u := fmt.Sprintf("accounts/%s", account)
 
 	var reply AccountInfo
-	if _, err := s.client.InvokeByCredential(ctx, http.MethodGet, u, nil, &reply); err != nil {
+	if _, err := s.client.InvokeWithCredential(ctx, http.MethodGet, u, nil, &reply); err != nil {
 		return nil, err
 	}
 	return &reply, nil
@@ -113,7 +113,7 @@ func (s *AccountsService) ListAccounts(ctx context.Context, opts *ListAccountsOp
 // Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-accounts.html#set-active
 func (s *AccountsService) SetActive(ctx context.Context, accountID string) error {
 	u := fmt.Sprintf("accounts/%s/active", accountID)
-	if _, err := s.client.InvokeByCredential(ctx, http.MethodPut, u, nil, nil, true); err != nil {
+	if _, err := s.client.InvokeWithCredential(ctx, http.MethodPut, u, nil, nil, DelContentType()); err != nil {
 		return err
 	}
 	return nil
@@ -123,7 +123,51 @@ func (s *AccountsService) SetActive(ctx context.Context, accountID string) error
 // Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-accounts.html#delete-active
 func (s *AccountsService) DeleteActive(ctx context.Context, accountID string) error {
 	u := fmt.Sprintf("accounts/%s/active", accountID)
-	if _, err := s.client.InvokeByCredential(ctx, http.MethodDelete, u, nil, nil, true); err != nil {
+	if _, err := s.client.InvokeWithCredential(ctx, http.MethodDelete, u, nil, nil, DelContentType()); err != nil {
+		return err
+	}
+	return nil
+}
+
+// SSHKeyInfo entity contains information about an SSH key of a user.
+type SSHKeyInfo struct {
+	Seq          int    `json:"seq"`
+	SSHPublicKey string `json:"ssh_public_key"`
+	EncodedKey   string `json:"encoded_key"`
+	Algorithm    string `json:"algorithm"`
+	Comment      string `json:"comment,omitempty"`
+	Valid        bool   `json:"valid"`
+}
+
+// ListSSHKeys Returns the SSH keys of an account.
+//
+// Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-accounts.html#list-ssh-keys
+func (s *AccountsService) ListSSHKeys(ctx context.Context) ([]*SSHKeyInfo, error) {
+	var reply []*SSHKeyInfo
+	if _, err := s.client.InvokeWithCredential(ctx, http.MethodGet, "accounts/self/sshkeys", nil, &reply); err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+// AddSSHKey Adds an SSH key for self user.
+//
+// Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-accounts.html#list-ssh-keys
+func (s *AccountsService) AddSSHKey(ctx context.Context, key string) (*SSHKeyInfo, error) {
+	var reply SSHKeyInfo
+	if _, err := s.client.InvokeWithCredential(ctx, http.MethodPost, "accounts/self/sshkeys", nil, &reply,
+		PlainText(key)); err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}
+
+// DeleteSSHKey Deletes an SSH key of self user.
+//
+// Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-accounts.html#list-ssh-keys
+func (s *AccountsService) DeleteSSHKey(ctx context.Context, id int) error {
+	u := fmt.Sprintf("accounts/self/sshkeys/%d", id)
+	if _, err := s.client.InvokeWithCredential(ctx, http.MethodDelete, u, nil, nil, DelContentType()); err != nil {
 		return err
 	}
 	return nil

@@ -35,7 +35,7 @@ type ListBranchesOptions struct {
 func (s *ProjectsService) ListBranches(ctx context.Context, projectName string, opts *ListBranchesOptions) ([]*BranchInfo, error) {
 	u := fmt.Sprintf("projects/%s/branches/", projectName)
 	var branches []*BranchInfo
-	if _, err := s.client.InvokeByCredential(ctx, http.MethodGet, u, opts, &branches); err != nil {
+	if _, err := s.client.InvokeWithCredential(ctx, http.MethodGet, u, opts, &branches); err != nil {
 		return nil, err
 	}
 	return branches, nil
@@ -48,7 +48,7 @@ func (s *ProjectsService) GetBranch(ctx context.Context, projectName, branchID s
 	u := fmt.Sprintf("projects/%s/branches/%s", projectName, branchID)
 
 	var reply BranchInfo
-	if _, err := s.client.InvokeByCredential(ctx, http.MethodGet, u, nil, &reply); err != nil {
+	if _, err := s.client.InvokeWithCredential(ctx, http.MethodGet, u, nil, &reply); err != nil {
 		return nil, err
 	}
 	return &reply, nil
@@ -64,7 +64,7 @@ func (s *ProjectsService) GetBranchContent(ctx context.Context, projectName, bra
 		branchID,
 		fileID)
 	var reply string
-	if _, err := s.client.InvokeByCredential(ctx, http.MethodGet, u, nil, &reply); err != nil {
+	if _, err := s.client.InvokeWithCredential(ctx, http.MethodGet, u, nil, &reply); err != nil {
 		return "", err
 	}
 	return reply, nil
