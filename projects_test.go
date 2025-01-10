@@ -81,3 +81,16 @@ func TestProjectsService_CreateProject(t *testing.T) {
 
 	t.Logf("projects: %v", project)
 }
+
+func TestProjectsService_ListAccessRights(t *testing.T) {
+	client := NewClient(testPasswordCredential, &Options{
+		Debug: true,
+	})
+	reply, err := client.Projects.ListAccessRights(context.Background(), "All-Users")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("reply: %v", reply)
+}

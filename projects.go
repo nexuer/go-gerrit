@@ -150,3 +150,17 @@ func (s *ProjectsService) CreateProject(ctx context.Context, projectName string,
 
 	return &project, nil
 }
+
+// ListAccessRights lists the access rights for a single project
+//
+// Gerrit API docs: https://gerrit-review.googlesource.com/Documentation/rest-api-projects.html#get-access
+func (s *ProjectsService) ListAccessRights(ctx context.Context, projectName string) (*ProjectAccessInfo, error) {
+	u := fmt.Sprintf("projects/%s/access", projectName)
+
+	var reply ProjectAccessInfo
+	if _, err := s.client.InvokeWithCredential(ctx, http.MethodGet, u, nil, &reply); err != nil {
+		return nil, err
+	}
+
+	return &reply, nil
+}

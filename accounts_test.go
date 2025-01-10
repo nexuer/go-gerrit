@@ -17,8 +17,10 @@ func TestAccountsService_QueryAccounts(t *testing.T) {
 	)
 
 	reply, err := client.Accounts.QueryAccounts(context.Background(), q.String(), &QueryAccountsOptions{
-		ListOptions:      NewListOptions(0, 100),
-		AdditionalFields: []AccountAdditionalField{Details},
+		ListOptions: NewListOptions(0, 100),
+		AdditionalFields: []AccountAdditionalField{
+			DETAILS,
+		},
 	})
 
 	if err != nil {

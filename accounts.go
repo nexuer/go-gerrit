@@ -73,8 +73,8 @@ func (s *AccountsService) GetAccount(ctx context.Context, account string) (*Acco
 type AccountAdditionalField string
 
 const (
-	Details   AccountAdditionalField = "DETAILS"
-	AllEmails AccountAdditionalField = "ALL_EMAILS"
+	DETAILS    AccountAdditionalField = "DETAILS"
+	ALL_EMAILS AccountAdditionalField = "ALL_EMAILS"
 )
 
 type ListAccountsOptions struct {
@@ -103,7 +103,7 @@ func (s *AccountsService) ListAccounts(ctx context.Context, opts *ListAccountsOp
 		}
 		queryOpts = &QueryAccountsOptions{
 			ListOptions:      opts.ListOptions,
-			AdditionalFields: []AccountAdditionalField{AllEmails, Details},
+			AdditionalFields: []AccountAdditionalField{ALL_EMAILS, DETAILS},
 		}
 	}
 	return s.QueryAccounts(ctx, Or(f...).String(), queryOpts)

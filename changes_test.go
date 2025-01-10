@@ -23,9 +23,13 @@ func TestChangesService_QueryChanges(t *testing.T) {
 	)
 
 	reply, err := client.Changes.QueryChanges(context.Background(), &QueryChangesOptions{
-		ListOptions:      NewListOptions(0, 100),
-		Query:            ptr.Ptr(q.String()),
-		AdditionalFields: []AdditionalField{CurrentRevision, CurrentCommit, WebLinks},
+		ListOptions: NewListOptions(0, 100),
+		Query:       ptr.Ptr(q.String()),
+		AdditionalFields: []AdditionalField{
+			CURRENT_REVISION,
+			CURRENT_COMMIT,
+			WEB_LINKS,
+		},
 	})
 
 	if err != nil {

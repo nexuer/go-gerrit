@@ -29,6 +29,16 @@ const (
 	Hidden   ProjectState = "HIDDEN"
 )
 
+type PermissionAction string
+
+const (
+	Allow       PermissionAction = "ALLOW"
+	Deny        PermissionAction = "DENY"
+	Block       PermissionAction = "BLOCK"
+	Interactive PermissionAction = "INTERACTIVE"
+	Batch       PermissionAction = "BATCH"
+)
+
 type ProjectType string
 
 const (
