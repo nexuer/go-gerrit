@@ -1,18 +1,20 @@
-package gerrit
+package gerrit_test
 
 import (
 	"context"
 	"fmt"
 	"net/url"
 	"testing"
+
+	"github.com/nexuer/go-gerrit"
 )
 
 func TestProjectsService_ListBranches(t *testing.T) {
-	client := NewClient(testPasswordCredential, &Options{
+	client := gerrit.NewClient(testPasswordCredential, &gerrit.Options{
 		Debug: true,
 	})
 
-	branches, err := client.Projects.ListBranches(context.Background(), "All-Projects", &ListBranchesOptions{})
+	branches, err := client.Projects.ListBranches(context.Background(), "All-Projects", &gerrit.ListBranchesOptions{})
 
 	if err != nil {
 		t.Fatal(err)
@@ -25,7 +27,7 @@ func TestProjectsService_ListBranches(t *testing.T) {
 }
 
 func TestProjectsService_GetBranch(t *testing.T) {
-	client := NewClient(testPasswordCredential, &Options{
+	client := gerrit.NewClient(testPasswordCredential, &gerrit.Options{
 		Debug: true,
 	})
 
@@ -40,7 +42,7 @@ func TestProjectsService_GetBranch(t *testing.T) {
 }
 
 func TestProjectsService_GetBranchContent(t *testing.T) {
-	client := NewClient(testPasswordCredential, &Options{
+	client := gerrit.NewClient(testPasswordCredential, &gerrit.Options{
 		Debug: true,
 	})
 

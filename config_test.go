@@ -1,12 +1,14 @@
-package gerrit
+package gerrit_test
 
 import (
 	"context"
 	"testing"
+
+	"github.com/nexuer/go-gerrit"
 )
 
 func TestConfigService_GetVersion(t *testing.T) {
-	client := NewClient(testPasswordCredential, &Options{
+	client := gerrit.NewClient(testPasswordCredential, &gerrit.Options{
 		Debug: true,
 	})
 
@@ -20,7 +22,7 @@ func TestConfigService_GetVersion(t *testing.T) {
 }
 
 func TestConfigService_GetServerInfo(t *testing.T) {
-	client := NewClient(testPasswordCredential, &Options{
+	client := gerrit.NewClient(testPasswordCredential, &gerrit.Options{
 		Debug: true,
 	})
 

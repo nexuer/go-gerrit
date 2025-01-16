@@ -1,21 +1,23 @@
-package gerrit
+package gerrit_test
 
 import (
 	"context"
 	"fmt"
 	"testing"
 
+	"github.com/nexuer/go-gerrit"
+
 	"github.com/nexuer/utils/ptr"
 )
 
 func TestProjectsService_ListProjects(t *testing.T) {
-	client := NewClient(testPasswordCredential, &Options{
+	client := gerrit.NewClient(testPasswordCredential, &gerrit.Options{
 		Debug: true,
 	})
 
-	projects, err := client.Projects.ListProjects(context.Background(), &ListProjectsOptions{
+	projects, err := client.Projects.ListProjects(context.Background(), &gerrit.ListProjectsOptions{
 		Description: ptr.Ptr(true),
-		ListOptions: NewListOptions(0, 50),
+		ListOptions: gerrit.NewListOptions(0, 50),
 		All:         ptr.Ptr(true),
 	})
 
@@ -29,7 +31,7 @@ func TestProjectsService_ListProjects(t *testing.T) {
 }
 
 func TestProjectsService_GetProject(t *testing.T) {
-	client := NewClient(testPasswordCredential, &Options{
+	client := gerrit.NewClient(testPasswordCredential, &gerrit.Options{
 		Debug: true,
 	})
 
@@ -44,7 +46,7 @@ func TestProjectsService_GetProject(t *testing.T) {
 }
 
 func TestProjectsService_GetHEAD(t *testing.T) {
-	client := NewClient(testPasswordCredential, &Options{
+	client := gerrit.NewClient(testPasswordCredential, &gerrit.Options{
 		Debug: true,
 	})
 
@@ -58,7 +60,7 @@ func TestProjectsService_GetHEAD(t *testing.T) {
 }
 
 func TestProjectsService_GetRepositoryStatistics(t *testing.T) {
-	client := NewClient(testPasswordCredential, &Options{
+	client := gerrit.NewClient(testPasswordCredential, &gerrit.Options{
 		Debug: true,
 	})
 
@@ -72,9 +74,9 @@ func TestProjectsService_GetRepositoryStatistics(t *testing.T) {
 }
 
 func TestProjectsService_CreateProject(t *testing.T) {
-	client := NewClient(testPasswordCredential, &Options{Debug: true})
+	client := gerrit.NewClient(testPasswordCredential, &gerrit.Options{Debug: true})
 
-	project, err := client.Projects.CreateProject(context.Background(), "test-1", &CreateProjectOptions{})
+	project, err := client.Projects.CreateProject(context.Background(), "test-1", &gerrit.CreateProjectOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -83,10 +85,10 @@ func TestProjectsService_CreateProject(t *testing.T) {
 }
 
 func TestProjectsService_ListAccessRights(t *testing.T) {
-	client := NewClient(testPasswordCredential, &Options{
+	client := gerrit.NewClient(testPasswordCredential, &gerrit.Options{
 		Debug: true,
 	})
-	reply, err := client.Projects.ListAccessRights(context.Background(), "All-Users")
+	reply, err := client.Projects.ListAccessRights(context.Background(), "All-Projects")
 
 	if err != nil {
 		t.Fatal(err)

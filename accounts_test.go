@@ -1,25 +1,27 @@
-package gerrit
+package gerrit_test
 
 import (
 	"context"
 	"fmt"
 	"testing"
+
+	"github.com/nexuer/go-gerrit"
 )
 
 func TestAccountsService_QueryAccounts(t *testing.T) {
-	client := NewClient(testPasswordCredential, &Options{
+	client := gerrit.NewClient(testPasswordCredential, &gerrit.Options{
 		Debug: true,
 	})
 
-	q := Or(
-		F("is", "active"),
-		F("is", "inactive"),
+	q := gerrit.Or(
+		gerrit.F("is", "active"),
+		gerrit.F("is", "inactive"),
 	)
 
-	reply, err := client.Accounts.QueryAccounts(context.Background(), q.String(), &QueryAccountsOptions{
-		ListOptions: NewListOptions(0, 100),
-		AdditionalFields: []AccountAdditionalField{
-			DETAILS,
+	reply, err := client.Accounts.QueryAccounts(context.Background(), q.String(), &gerrit.QueryAccountsOptions{
+		ListOptions: gerrit.NewListOptions(0, 100),
+		AdditionalFields: []gerrit.AccountAdditionalField{
+			gerrit.DETAILS,
 		},
 	})
 
@@ -31,7 +33,7 @@ func TestAccountsService_QueryAccounts(t *testing.T) {
 }
 
 func TestAccountsService_GetAccount(t *testing.T) {
-	client := NewClient(testPasswordCredential, &Options{
+	client := gerrit.NewClient(testPasswordCredential, &gerrit.Options{
 		Debug: true,
 	})
 
@@ -45,7 +47,7 @@ func TestAccountsService_GetAccount(t *testing.T) {
 }
 
 func TestAccountsService_SetActive(t *testing.T) {
-	client := NewClient(testPasswordCredential, &Options{
+	client := gerrit.NewClient(testPasswordCredential, &gerrit.Options{
 		Debug: true,
 	})
 
@@ -60,7 +62,7 @@ func TestAccountsService_SetActive(t *testing.T) {
 }
 
 func TestAccountsService_DeleteActive(t *testing.T) {
-	client := NewClient(testPasswordCredential, &Options{
+	client := gerrit.NewClient(testPasswordCredential, &gerrit.Options{
 		Debug: true,
 	})
 
@@ -75,12 +77,12 @@ func TestAccountsService_DeleteActive(t *testing.T) {
 }
 
 func TestAccountsService_ListAccounts(t *testing.T) {
-	client := NewClient(testPasswordCredential, &Options{
+	client := gerrit.NewClient(testPasswordCredential, &gerrit.Options{
 		Debug: true,
 	})
 
-	reply, err := client.Accounts.ListAccounts(context.Background(), &ListAccountsOptions{
-		ListOptions:     NewListOptions(0, 100),
+	reply, err := client.Accounts.ListAccounts(context.Background(), &gerrit.ListAccountsOptions{
+		ListOptions:     gerrit.NewListOptions(0, 100),
 		IncludeInactive: true,
 		//ExcludeActive:    true,
 	})
@@ -93,7 +95,7 @@ func TestAccountsService_ListAccounts(t *testing.T) {
 }
 
 func TestAccountsService_ListSSHKeys(t *testing.T) {
-	client := NewClient(testPasswordCredential, &Options{
+	client := gerrit.NewClient(testPasswordCredential, &gerrit.Options{
 		Debug: true,
 	})
 
@@ -107,7 +109,7 @@ func TestAccountsService_ListSSHKeys(t *testing.T) {
 }
 
 func TestAccountsService_AddSSHKey(t *testing.T) {
-	client := NewClient(testPasswordCredential, &Options{
+	client := gerrit.NewClient(testPasswordCredential, &gerrit.Options{
 		Debug: true,
 	})
 
@@ -121,7 +123,7 @@ func TestAccountsService_AddSSHKey(t *testing.T) {
 }
 
 func TestAccountsService_DeleteSSHKey(t *testing.T) {
-	client := NewClient(testPasswordCredential, &Options{
+	client := gerrit.NewClient(testPasswordCredential, &gerrit.Options{
 		Debug: true,
 	})
 

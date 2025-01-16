@@ -1,12 +1,14 @@
-package gerrit
+package gerrit_test
 
 import (
 	"context"
 	"testing"
+
+	"github.com/nexuer/go-gerrit"
 )
 
 func TestProjectsService_GetCommit(t *testing.T) {
-	client := NewClient(testPasswordCredential, &Options{
+	client := gerrit.NewClient(testPasswordCredential, &gerrit.Options{
 		Debug: true,
 	})
 

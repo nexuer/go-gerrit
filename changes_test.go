@@ -1,4 +1,4 @@
-package gerrit
+package gerrit_test
 
 import (
 	"context"
@@ -6,29 +6,30 @@ import (
 	"testing"
 	"time"
 
+	"github.com/nexuer/go-gerrit"
 	"github.com/nexuer/utils/ptr"
 )
 
 func TestChangesService_QueryChanges(t *testing.T) {
-	client := NewClient(testPasswordCredential, &Options{
+	client := gerrit.NewClient(testPasswordCredential, &gerrit.Options{
 		Debug: true,
 	})
 
-	q := And(
-		Or(
-			F("status", "open"),
-			F("status", "merged"),
+	q := gerrit.And(
+		gerrit.Or(
+			gerrit.F("status", "open"),
+			gerrit.F("status", "merged"),
 		),
-		F("since", T(time.Date(2024, 11, 19, 8, 51, 36, 0, time.UTC))),
+		gerrit.F("since", gerrit.T(time.Date(2024, 11, 19, 8, 51, 36, 0, time.UTC))),
 	)
 
-	reply, err := client.Changes.QueryChanges(context.Background(), &QueryChangesOptions{
-		ListOptions: NewListOptions(0, 100),
+	reply, err := client.Changes.QueryChanges(context.Background(), &gerrit.QueryChangesOptions{
+		ListOptions: gerrit.NewListOptions(0, 100),
 		Query:       ptr.Ptr(q.String()),
-		AdditionalFields: []AdditionalField{
-			CURRENT_REVISION,
-			CURRENT_COMMIT,
-			WEB_LINKS,
+		AdditionalFields: []gerrit.AdditionalField{
+			gerrit.CURRENT_REVISION,
+			gerrit.CURRENT_COMMIT,
+			gerrit.WEB_LINKS,
 		},
 	})
 
