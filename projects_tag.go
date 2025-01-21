@@ -16,8 +16,17 @@ type TagInfo struct {
 	Created  *Timestamp    `json:"created,omitempty"`
 }
 
+type TagSortBy string
+
+const (
+	TagSortByCreationTime TagSortBy = "creation_time"
+)
+
 type ListTagsOptions struct {
 	ListOptions `query:",inline,omitempty"`
+
+	SortBy          TagSortBy `query:"sort-by,omitempty"`
+	DescendingOrder bool      `query:"d,omitempty"`
 }
 
 // ListTags list the tags of a project.

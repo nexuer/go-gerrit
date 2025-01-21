@@ -13,7 +13,9 @@ func TestProjectsService_ListTags(t *testing.T) {
 		Debug: true,
 	})
 
-	tags, err := client.Projects.ListTags(context.Background(), "All-Projects", &gerrit.ListTagsOptions{})
+	tags, err := client.Projects.ListTags(context.Background(), "All-Projects", &gerrit.ListTagsOptions{
+		//SortBy: gerrit.TagSortByCreationTime,
+	})
 
 	if err != nil {
 		t.Fatal(err)
