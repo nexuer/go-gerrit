@@ -93,13 +93,13 @@ func (s *ProjectsService) GetHEAD(ctx context.Context, projectName string) (stri
 
 // RepositoryStatisticsInfo entity contains information about statistics of a Git repository.
 type RepositoryStatisticsInfo struct {
-	NumberOfLooseObjects  int `json:"number_of_loose_objects"`
-	NumberOfLooseRefs     int `json:"number_of_loose_refs"`
-	NumberOfPackFiles     int `json:"number_of_pack_files"`
-	NumberOfPackedObjects int `json:"number_of_packed_objects"`
-	NumberOfPackedRefs    int `json:"number_of_packed_refs"`
-	SizeOfLooseObjects    int `json:"size_of_loose_objects"`
-	SizeOfPackedObjects   int `json:"size_of_packed_objects"`
+	NumberOfLooseObjects  int64 `json:"number_of_loose_objects"`
+	NumberOfLooseRefs     int64 `json:"number_of_loose_refs"`
+	NumberOfPackFiles     int64 `json:"number_of_pack_files"`
+	NumberOfPackedObjects int64 `json:"number_of_packed_objects"`
+	NumberOfPackedRefs    int64 `json:"number_of_packed_refs"`
+	SizeOfLooseObjects    int64 `json:"size_of_loose_objects"`
+	SizeOfPackedObjects   int64 `json:"size_of_packed_objects"`
 }
 
 // GetRepositoryStatistics return statistics for the repository of a project.
