@@ -106,7 +106,7 @@ func (s *ProjectsService) GetReflog(ctx context.Context, projectID, branchID str
 		}
 
 		if !args.ToTime.IsZero() {
-			args.To = args.FromTime.Format("20060102_1504")
+			args.To = args.ToTime.Format("20060102_1504")
 		}
 	}
 
